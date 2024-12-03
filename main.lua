@@ -1,77 +1,39 @@
 ---@diagnostic disable-next-line: lowercase-global
 _G.love = require("love")
 
-function love.load()
-jack = {
-        x = 0,
-        y = 0,
-        sprite = love.graphics.newImage("img/run.png"),
+local player = {
+    radius = 20,
+    x = 30,
+    y = 30
+}
 
-        animation = {
-            dirction = "right",
-            idle = true,
-            frame = 1,
-            max_frames = 8,
-            speed = 30,
-            timer = 0.1
-        }
+local game = {
+    state = {
+        menu = true,
+        paused = false,
+        running = false,
+        ended = false,
+
     }
-SPRITE_WIDTH, SPRITE_HEIGHT = 5352, 569
-QUAD_WIDTH = 669
-QUAD_HEIGTH = SPRITE_HEIGHT
+}
 
-
-quads = {}
-
-for i = 1, jack.animation.max_frames  do
-    quads[i] = love.graphics.newQuad(QUAD_WIDTH * (i - 1), 0, QUAD_WIDTH, QUAD_HEIGTH, SPRITE_WIDTH, SPRITE_HEIGHT)
-end
-
+function love.load()
+    love.mouse.setVisible(false)
 end
 
 function love.update(dt)
-
-    if love.keyboard.isDown("d") then
-        jack.animation.idle = false
-        jack.animation.dirction = "right"
-    elseif love.keyboard.isDown("a") then
-        jack.animation.idle = false
-        jack.animation.dirction = "left"
-    else
-        jack.animation.idle = true
-        jack.animation.frame = 1
-    end
-
-
-    if not jack.animation.idle then
-        jack.animation.timer = jack.animation.timer + dt
-
-        if jack.animation.timer > 0.2 then
-            jack.animation.timer = 0.1
-
-            jack.animation.frame = jack.animation.frame + 1
-
-            if jack.animation.dirction == "right" then
-                jack.x = jack.x + jack.animation.speed
-            elseif jack.animation.dirction == "left" then
-                jack.x = jack.x - jack.animation.speed
-            end
-
-            if jack.animation.frame > jack.animation.max_frames then
-                jack.animation.frame = 1
-            end
-            
-        end
-    end
-
+    player.x, player.y = love.mouse.getPosition()
 end
 
 function love.draw()
-    love.graphics.scale(0.3)
-    
-    if jack.animation.dirction == "right" then
-        love.graphics.draw(jack.sprite, quads[jack.animation.frame], jack.x, jack.y)
-    else 
-        love.graphics.draw(jack.sprite, quads[jack.animation.frame], jack.x, jack.y, 0, -1, 1, QUAD_WIDTH + 100, 0)
+    love.graphics.printf("FPS: " .. love.timer.getFPS(), love.graphics.newFont(16), 10, love.graphics.getHeight() - 30, love.graphics.getWidth())
+
+    if game.state["running"] then
+        love.graphics.circle("fill", player.x, player.y,  player.radius) 
     end
-end 
+
+    if not game.state["runnig"] then
+        love.graphics.circle("fill", player.x, player.y,  player.radius / 2)
+    end
+
+end

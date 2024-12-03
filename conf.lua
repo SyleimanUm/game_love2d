@@ -7,8 +7,6 @@ function love.conf(t)
 
     -- t.audio.mic = true
 
-    t.window.title = "Cool ball game"
-    t.window.icon = "icon/game_icon.png"
-    t.window.width = 1200
-    t.window.height = 700
+    t.window.title = "Save ball game"
+    -- t.window.icon = "icon/game_icon.png"
 end
