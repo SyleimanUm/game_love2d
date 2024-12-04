@@ -19,7 +19,7 @@ local game = {
         paused = false,
         running = false,
         ended = false,
-
+        settings = false
     },
 
     points = 0,
@@ -47,7 +47,8 @@ local enemies = {}
 
 local buttons = {
     menu_state = {},
-    ended_state = {}
+    ended_state = {},
+    settings_state = {}
 }
 
 local function changeGameState(state)
@@ -55,6 +56,15 @@ local function changeGameState(state)
     game.state["paused"] = state == "paused"
     game.state["running"] = state == "running"
     game.state["ended"] = state == "ended"
+    game.state["settings"] = state == "settings"
+end
+
+local function increaseDifficulty()
+    game.difficulty = game.difficulty + 1
+end
+
+local function decreaseDifficulty()
+    game.difficulty = game.difficulty - 1
 end
 
 local function startNewGame()
@@ -77,6 +87,10 @@ function love.mousepressed(x, y, button, istouch, presses)
                 for index in pairs(buttons.ended_state) do
                     buttons.ended_state[index]:checkPresed(x, y, player.radius)
                 end
+            elseif game.state["settings"] then
+                for index in pairs(buttons.settings_state) do
+                    buttons.settings_state[index]:checkPresed(x, y, player.radius)
+                end
             end
         end
     end
@@ -86,20 +100,28 @@ function love.load()
     love.mouse.setVisible(false)
 
     buttons.menu_state.play_game = button("Play", startNewGame, nil, 120, 40)
-    buttons.menu_state.settings = button("Settings", nil, nil, 120, 40)
+    buttons.menu_state.settings = button("Settings", changeGameState, "settings", 120, 40)
     buttons.menu_state.exit_game = button("Exit", love.event.quit, nil, 120, 40)
     
     buttons.ended_state.replay_game = button("Replay game", startNewGame, nil, 100, 50)
     buttons.ended_state.menu = button("Menu", changeGameState, "menu", 100, 50)
     buttons.ended_state.exit_game = button("Exit", love.event.quit, nil, 100, 50)
 
+    buttons.settings_state.menu = button("Menu", changeGameState, "menu", 120, 40)
+    buttons.settings_state.plus = button("+", increaseDifficulty, nil , 40, 40)
+    buttons.settings_state.minus = button("-", decreaseDifficulty, nil, 40, 40)
+
 end
 
 function love.update(dt)
     player.x, player.y = love.mouse.getPosition()
-
+    
     if game.state["running"] then
         
+        if love.keyboard.isDown("p") then
+            changeGameState("paused")
+        end
+
         for i = 1, #enemies do
             if not enemies[i]:checkTouched(player.x, player.y, player.radius) then
                 enemies[i]:move(player.x, player.y)
@@ -119,7 +141,15 @@ function love.update(dt)
         end
 
         game.points = game.points + dt
+
     end
+
+    if game.state["paused"] then
+        if love.keyboard.isDown("u") then
+            changeGameState("running")
+        end
+    end
+
 end
 
 function love.draw()
@@ -139,6 +169,14 @@ function love.draw()
         buttons.menu_state.play_game:draw(10, 20, 17,  10)
         buttons.menu_state.settings:draw(10, 70, 17,  10)
         buttons.menu_state.exit_game:draw(10, 120, 17,  10)
+    elseif game.state["settings"] then
+        buttons.settings_state.menu:draw(10, 20, 17,  10)
+        love.graphics.printf("Difficulty : ", fonts.medium.font, 10, 80, love.graphics.getWidth())
+        love.graphics.printf(game.difficulty, fonts.medium.font, 150, 80, love.graphics.getWidth())
+        buttons.settings_state.plus:draw(100, 70, 17,  10)
+        buttons.settings_state.minus:draw(200, 70, 17,  10)
+    elseif game.state["paused"] then
+        love.graphics.printf("Pause", fonts.massive.font, 0, love.graphics.getHeight()/2 - fonts.massive.size, love.graphics.getWidth(), "center")
     elseif game.state["ended"] then
         love.graphics.setFont(fonts.large.font)
         buttons.ended_state.replay_game:draw(love.graphics.getWidth() / 2.25, love.graphics.getHeight() / 1.8, 10,  10)
