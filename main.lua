@@ -115,12 +115,21 @@ end
 
 function love.update(dt)
     player.x, player.y = love.mouse.getPosition()
+
+    function love.keypressed(key)
+        if game.state.running then
+            if key == "p" then
+                changeGameState("paused")
+            end
+        elseif game.state.paused then
+            if key == "p" then
+                changeGameState("running")
+            end
+        end
+    end
+
     
     if game.state["running"] then
-        
-        if love.keyboard.isDown("p") then
-            changeGameState("paused")
-        end
 
         for i = 1, #enemies do
             if not enemies[i]:checkTouched(player.x, player.y, player.radius) then
